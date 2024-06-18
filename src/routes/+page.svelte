@@ -2,4 +2,6 @@
   import RetirementForm from '$lib/components/RetirementForm.svelte';
 </script>
 
-<RetirementForm />
+<div class="p-4">
+  <RetirementForm />
+</div>

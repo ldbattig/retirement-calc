@@ -1,14 +1,26 @@
 <script lang="ts">
-  import { currentAge, retirementAge, annualIncome, livingExpenses, assetAllocation, annualInflation, withdrawalRate } from '$lib/store';
+  import { currentAge, retirementAge, annualIncome, livingExpenses, stockAllocation, bondAllocation, annualInflation, withdrawalRate } from '$lib/store';
 
   let totalAssetsAtRetirement = 0;
   let yearsAssetsWillLast = 0;
 
   $: {
-    const { totalAssets, yearsLasted } = calculateAssets($currentAge, $retirementAge, $annualIncome, $livingExpenses, $assetAllocation, $annualInflation, $withdrawalRate);
+    const { totalAssets, yearsLasted } = calculateAssets($currentAge, $retirementAge, $annualIncome, $livingExpenses, $stockAllocation, $annualInflation, $withdrawalRate);
     totalAssetsAtRetirement = totalAssets;
     yearsAssetsWillLast = yearsLasted;
   }
+
+  $: stockAllocation.subscribe(value => {
+    if (value !== 100 - $bondAllocation) {
+      bondAllocation.set(100 - value);
+    }
+  });
+
+  $: bondAllocation.subscribe(value => {
+    if (value !== 100 - $stockAllocation) {
+      stockAllocation.set(100 - value);
+    }
+  });
 
   function calculateAssets(currentAge: number, retirementAge: number, annualIncome: number, livingExpenses: number, assetAllocation: number, annualInflation: number, withdrawalRate: number) {
     const yearsToRetirement = retirementAge - currentAge;
@@ -36,12 +48,12 @@
 
     return {
       totalAssets: assetsAtRetirement,
-      yearsLasted: yearsInRetirement - 1 // Subtract one because the loop increments one extra year before going negative
+      yearsLasted: Math.max(0, yearsInRetirement - 1) // Subtract one because the loop increments one extra year before going negative
     };
   }
 </script>
 
-<div class="p-4">
+<div class="max-w-xl mx-auto p-4 bg-white shadow-md rounded-md">
   <h1 class="text-2xl font-bold mb-4">Retirement Calculator</h1>
 
   <div class="mb-4">
@@ -52,7 +64,7 @@
 
   <div class="mb-4">
     <label for="retirementAge" class="block text-sm font-medium text-gray-700">Retirement Age</label>
-    <input type="range" id="retirementAge" bind:value={$retirementAge} min="40" max="100" class="mt-1 block w-full" />
+    <input type="range" id="retirementAge" bind:value={$retirementAge} min="20" max="100" class="mt-1 block w-full" />
     <p>{$retirementAge}</p>
   </div>
 
@@ -67,9 +79,15 @@
   </div>
 
   <div class="mb-4">
-    <label for="assetAllocation" class="block text-sm font-medium text-gray-700">Asset Allocation (% in Stocks)</label>
-    <input type="range" id="assetAllocation" bind:value={$assetAllocation} min="0" max="100" class="mt-1 block w-full" />
-    <p>{$assetAllocation}%</p>
+    <label for="stockAllocation" class="block text-sm font-medium text-gray-700">Stocks Allocation (%)</label>
+    <input type="range" id="stockAllocation" bind:value={$stockAllocation} min="0" max="100" class="mt-1 block w-full" />
+    <p>{$stockAllocation}%</p>
+  </div>
+
+  <div class="mb-4">
+    <label for="bondAllocation" class="block text-sm font-medium text-gray-700">Bonds Allocation (%)</label>
+    <input type="range" id="bondAllocation" bind:value={$bondAllocation} min="0" max="100" class="mt-1 block w-full" />
+    <p>{$bondAllocation}%</p>
   </div>
 
   <div class="mb-4">
