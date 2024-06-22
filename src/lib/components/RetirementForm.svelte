@@ -1,5 +1,6 @@
 <script lang="ts">
   import { currentAge, retirementAge, annualIncome, livingExpenses, stockAllocation, bondAllocation, annualInflation, withdrawalRate } from '$lib/store';
+  import { calculateAssets } from '$lib/utils/calculations';
 
   let totalAssetsAtRetirement = 0;
   let yearsAssetsWillLast = 0;
@@ -8,48 +9,6 @@
     const { totalAssets, yearsLasted } = calculateAssets($currentAge, $retirementAge, $annualIncome, $livingExpenses, $stockAllocation, $annualInflation, $withdrawalRate);
     totalAssetsAtRetirement = totalAssets;
     yearsAssetsWillLast = yearsLasted;
-  }
-
-  $: stockAllocation.subscribe(value => {
-    if (value !== 100 - $bondAllocation) {
-      bondAllocation.set(100 - value);
-    }
-  });
-
-  $: bondAllocation.subscribe(value => {
-    if (value !== 100 - $stockAllocation) {
-      stockAllocation.set(100 - value);
-    }
-  });
-
-  function calculateAssets(currentAge: number, retirementAge: number, annualIncome: number, livingExpenses: number, assetAllocation: number, annualInflation: number, withdrawalRate: number) {
-    const yearsToRetirement = retirementAge - currentAge;
-    const annualSavings = annualIncome - livingExpenses;
-    const stockGrowthRate = 0.07;
-    const bondGrowthRate = 0.03;
-    const growthRate = (assetAllocation / 100) * stockGrowthRate + ((100 - assetAllocation) / 100) * bondGrowthRate;
-
-    // Accumulate assets until retirement
-    let assetsAtRetirement = 0;
-    for (let i = 0; i < yearsToRetirement; i++) {
-      assetsAtRetirement += annualSavings;
-      assetsAtRetirement *= (1 + growthRate);
-    }
-
-    // Withdraw from assets during retirement
-    let remainingAssets = assetsAtRetirement;
-    let yearsInRetirement = 0;
-    while (remainingAssets > 0) {
-      const withdrawalAmount = livingExpenses * Math.pow(1 + annualInflation / 100, yearsInRetirement);
-      remainingAssets -= withdrawalAmount;
-      remainingAssets *= (1 + (growthRate - withdrawalRate / 100));
-      yearsInRetirement++;
-    }
-
-    return {
-      totalAssets: assetsAtRetirement,
-      yearsLasted: Math.max(0, yearsInRetirement - 1) // Subtract one because the loop increments one extra year before going negative
-    };
   }
 </script>
 
