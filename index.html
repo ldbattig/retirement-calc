@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" href="./favicon.png" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		
+		<link href="./_app/immutable/assets/0.DsxE04wk.css" rel="stylesheet">
+		<link rel="modulepreload" href="./_app/immutable/entry/start.C5_sGWia.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/entry.BuVE69oI.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/scheduler.CtbWrGNo.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/index.BjqbIcNX.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/app.BWeRgvHs.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/index.CJT1c7eR.js">
+		<link rel="modulepreload" href="./_app/immutable/nodes/0.CXE3zgOu.js">
+		<link rel="modulepreload" href="./_app/immutable/nodes/2.cE1HRz6K.js">
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">  <div class="p-4"><div class="max-w-xl mx-auto p-4 bg-white shadow-md rounded-md"><h1 class="text-2xl font-bold mb-4" data-svelte-h="svelte-t7rg25">Retirement Calculator</h1> <div class="mb-4"><label for="currentAge" class="block text-sm font-medium text-gray-700" data-svelte-h="svelte-1txe016">Current Age</label> <input type="range" id="currentAge" min="20" max="100" class="mt-1 block w-full" value="30"> <p>30</p></div> <div class="mb-4"><label for="retirementAge" class="block text-sm font-medium text-gray-700" data-svelte-h="svelte-r2gjp6">Retirement Age</label> <input type="range" id="retirementAge" min="20" max="100" class="mt-1 block w-full" value="65"> <p>65</p></div> <div class="mb-4"><label for="annualIncome" class="block text-sm font-medium text-gray-700" data-svelte-h="svelte-1ckw5fu">Annual Income</label> <input type="number" id="annualIncome" class="mt-1 block w-full" value="50000"></div> <div class="mb-4"><label for="livingExpenses" class="block text-sm font-medium text-gray-700" data-svelte-h="svelte-1ucmkjm">Living Expenses</label> <input type="number" id="livingExpenses" class="mt-1 block w-full" value="30000"></div> <div class="mb-4"><label for="stockAllocation" class="block text-sm font-medium text-gray-700" data-svelte-h="svelte-127m52x">Stocks Allocation (%)</label> <input type="range" id="stockAllocation" min="0" max="100" class="mt-1 block w-full" value="70"> <p>70%</p></div> <div class="mb-4"><label for="bondAllocation" class="block text-sm font-medium text-gray-700" data-svelte-h="svelte-oetf9h">Bonds Allocation (%)</label> <input type="range" id="bondAllocation" min="0" max="100" class="mt-1 block w-full" value="30"> <p>30%</p></div> <div class="mb-4"><label for="annualInflation" class="block text-sm font-medium text-gray-700" data-svelte-h="svelte-cqd2r0">Annual Inflation (%)</label> <input type="range" id="annualInflation" min="0" max="10" step="0.1" class="mt-1 block w-full" value="2"> <p>2%</p></div> <div class="mb-4"><label for="withdrawalRate" class="block text-sm font-medium text-gray-700" data-svelte-h="svelte-nsdflu">Withdrawal Rate (%)</label> <input type="range" id="withdrawalRate" min="0" max="10" step="0.1" class="mt-1 block w-full" value="4"> <p>4%</p></div> <div class="mt-4 p-4 bg-gray-100 rounded"><h2 class="text-xl font-semibold" data-svelte-h="svelte-wga5vh">Calculated Assets at Retirement</h2> <p class="text-lg font-bold">$2259910.90</p> <h2 class="text-xl font-semibold" data-svelte-h="svelte-wxb2dd">Years Assets Will Last</h2> <p class="text-lg font-bold">70</p></div></div></div> 
+			
+			<script>
+				{
+					__sveltekit_yehtx4 = {
+						base: new URL(".", location).pathname.slice(0, -1),
+						assets: "/retirement-calc"
+					};
+
+					const element = document.currentScript.parentElement;
+
+					const data = [null,null];
+
+					Promise.all([
+						import("./_app/immutable/entry/start.C5_sGWia.js"),
+						import("./_app/immutable/entry/app.BWeRgvHs.js")
+					]).then(([kit, app]) => {
+						kit.start(app, element, {
+							node_ids: [0, 2],
+							data,
+							form: null,
+							error: null
+						});
+					});
+				}
+			</script>
+		</div>
+	</body>
+</html>
