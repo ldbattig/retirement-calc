@@ -10,6 +10,15 @@
     totalAssetsAtRetirement = totalAssets;
     yearsAssetsWillLast = yearsLasted;
   }
+
+  function formatCurrency(value: number) {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value);
+  }
 </script>
 
 <div class="max-w-xl mx-auto p-4 bg-white shadow-md rounded-md">
@@ -63,7 +72,7 @@
 
   <div class="mt-4 p-4 bg-gray-100 rounded">
     <h2 class="text-xl font-semibold">Calculated Assets at Retirement</h2>
-    <p class="text-lg font-bold">${totalAssetsAtRetirement.toFixed(2)}</p>
+    <p class="text-lg font-bold">{formatCurrency(totalAssetsAtRetirement)}</p>
     <h2 class="text-xl font-semibold">Years Assets Will Last</h2>
     <p class="text-lg font-bold">{yearsAssetsWillLast}</p>
   </div>
