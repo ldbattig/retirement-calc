@@ -1,4 +1,5 @@
 import { get, writable } from 'svelte/store';
+import { State } from './types/state';
 
 export const currentAge = writable(30);
 export const retirementAge = writable(65);
@@ -7,7 +8,7 @@ export const livingExpenses = writable(30000);
 export const stockAllocation = writable(70);
 export const bondAllocation = writable(30);
 export const annualInflation = writable(2);
-export const withdrawalRate = writable(4);
+export const selectedState = writable(State.CA);
 
 stockAllocation.subscribe(value => {
   if (value !== 100 - get(bondAllocation)) {

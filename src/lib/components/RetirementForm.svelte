@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { currentAge, retirementAge, annualIncome, livingExpenses, stockAllocation, bondAllocation, annualInflation, withdrawalRate } from '$lib/store';
+  import { currentAge, retirementAge, annualIncome, livingExpenses, stockAllocation, bondAllocation, annualInflation, selectedState } from '$lib/store';
   import { calculateAssets } from '$lib/utils/calculations';
-  import { Input, Label, Card } from 'flowbite-svelte';
-  import {ThumbsUpSolid} from 'flowbite-svelte-icons';
+  import { Input, Label, Card, Select } from 'flowbite-svelte';
+  import { ThumbsUpSolid } from 'flowbite-svelte-icons';
+  import { State } from '$lib/types/state';
 
   // Summary data calculated based on user input
   let totalAssetsAtRetirement = 0;
@@ -12,8 +13,13 @@
   const maxYears = 30;
   const minYears = 0;
 
+  const states = Object.keys(State).map(key => ({
+    value: State[key as keyof typeof State],
+    name: State[key as keyof typeof State]
+  }));
+
   $: {
-    const { totalAssets, yearsLasted } = calculateAssets($currentAge, $retirementAge, $annualIncome, $livingExpenses, $stockAllocation, $annualInflation, $withdrawalRate);
+    const { totalAssets, yearsLasted } = calculateAssets($currentAge, $retirementAge, $annualIncome, $livingExpenses, $stockAllocation, $annualInflation, $selectedState);
     totalAssetsAtRetirement = totalAssets;
     yearsAssetsWillLast = yearsLasted;
   }
@@ -55,12 +61,17 @@
       <div class="flex-1">
         <Label for="annualIncome" class="mb-2">Annual Income ($)</Label>
         <Input class="focus:ring-blue-500 focus:border-blue-500" type="number" bind:value={$annualIncome} id="annualIncome" />
-        </div>
+      </div>
 
       <div class="flex-1">
         <Label for="livingExpenses" class="mb-2">Living Expenses ($)</Label>
         <Input class="focus:ring-blue-500 focus:border-blue-500" type="number" bind:value={$livingExpenses} id="livingExpenses" />
-        </div>
+      </div>
+
+      <div class="flex-1">
+        <Label for="state" class="mb-2">State</Label>
+        <Select class="focus:ring-blue-500 focus:border-blue-500" items={states} bind:value={$selectedState} />
+      </div>
     </div>
 
     <div class="mb-4">
@@ -79,12 +90,6 @@
       <Label for="annualInflation" class="mb-2">Annual Inflation</Label>
       <input type="range" id="annualInflation" bind:value={$annualInflation} min="0" max="10" step="0.1" class="mt-1 block w-full" />
       <p>{$annualInflation}%</p>
-    </div>
-
-    <div class="mb-4">
-      <Label for="withdrawalRate" class="mb-2">Withdrawal Rate</Label>
-      <input type="range" id="withdrawalRate" bind:value={$withdrawalRate} min="0" max="10" step="0.1" class="mt-1 block w-full" />
-      <p>{$withdrawalRate}%</p>
     </div>
 
     <Card size="md" padding="md" class="text-gray-700">
