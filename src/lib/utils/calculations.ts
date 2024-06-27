@@ -3,7 +3,8 @@ import { STATE_TAX_RATES, FEDERAL_TAX_RATES } from "$lib/constants";
 import type { State } from "$lib/types/state";
 
 /**
- * Determine the assets available at a later date given income, expenses, and allocation data 
+ * Calculate retirement assets and the years they will last.
+ *
  * @param currentAge in years
  * @param retirementAge in years
  * @param annualIncome in whole dollars
@@ -22,28 +23,38 @@ export function calculateAssets(
   state: State
 ): RetirementCalculationResult {
   const yearsToRetirement = retirementAge - currentAge;
-  const biweeklyIncome = annualIncome / 26;
+  const taxedIncome = applyTax(annualIncome, state);
   const stockGrowthRate = 0.07;
   const bondGrowthRate = 0.03;
-  const growthRate = (stockAllocation / 100) * stockGrowthRate + ((100 - stockAllocation) / 100) * bondGrowthRate;
+  const annualGrowthRate = (stockAllocation / 100) * stockGrowthRate + ((100 - stockAllocation) / 100) * bondGrowthRate;
+  // Deposits are assumed to be biweekly
+  const biweeklyIncome = taxedIncome / 26;
+  const biweeklyGrowthRate = annualGrowthRate / 26;
 
   // Accumulate assets until retirement
   let assetsAtRetirement = 0;
+  const biweeklySavings = biweeklyIncome - (livingExpenses / 26);
   for (let i = 0; i < yearsToRetirement * 26; i++) {
-    const taxedIncome = applyTax(biweeklyIncome, state);
-    const biweeklySavings = taxedIncome - (livingExpenses / 26);
     assetsAtRetirement += biweeklySavings;
-    assetsAtRetirement *= Math.pow(1 + growthRate, 1 / 26); // Apply growth rate biweekly
+    assetsAtRetirement *= (1 + biweeklyGrowthRate);
   }
 
   // Withdraw from assets during retirement
   let remainingAssets = assetsAtRetirement;
   let yearsInRetirement = 0;
   while (remainingAssets > 0) {
-    const totalWithdrawal = calculateTotalWithdrawalNeeded(livingExpenses * Math.pow(1 + annualInflation / 100, yearsInRetirement), state);
-    remainingAssets -= totalWithdrawal;
-    remainingAssets *= (1 + growthRate); // Apply annual growth rate
+    const inflationMultiplier = Math.pow(1 + annualInflation / 100, yearsInRetirement);
+    // Account for inflation
+    const annualRetirementIncome = livingExpenses * inflationMultiplier;
+    // Account for taxes
+    const netWithdrawal = findGrossIncome(annualRetirementIncome, state);
+    remainingAssets -= netWithdrawal;
+    remainingAssets *= (1 + annualGrowthRate);
     yearsInRetirement++;
+    // Safety break to avoid infinite loop
+    if (yearsInRetirement > 1000) {
+      break;
+    }
   }
 
   return {
@@ -52,34 +63,64 @@ export function calculateAssets(
   };
 }
 
+/**
+ * Apply federal and state taxes to the given income.
+ * 
+ * @param income The gross income to be taxed
+ * @param state The state for which to apply state taxes
+ * @returns The net income after taxes
+ */
 function applyTax(income: number, state: State): number {
   let remainingIncome = income;
   let taxAmount = 0;
 
+  // Calculate federal tax
   for (const bracket of FEDERAL_TAX_RATES) {
     if (remainingIncome > bracket.threshold) {
+      // Tax up to the threshold
       taxAmount += bracket.threshold * bracket.rate;
       remainingIncome -= bracket.threshold;
     } else {
+      // Tax the remaining income
       taxAmount += remainingIncome * bracket.rate;
       break;
     }
   }
 
+  // Calculate state tax
   const stateTaxRate = STATE_TAX_RATES[state];
-  taxAmount += income * stateTaxRate;
+  taxAmount += income * stateTaxRate; // Add state tax
 
-  return income - taxAmount;
+  return income - taxAmount; // Return net income after all taxes
 }
 
-function calculateTotalWithdrawalNeeded(livingExpenses: number, state: State): number {
-  let totalWithdrawal = livingExpenses;
-  let netWithdrawal = applyTax(totalWithdrawal, state);
 
-  while (netWithdrawal < livingExpenses) {
-    totalWithdrawal += (livingExpenses - netWithdrawal) / (1 - (FEDERAL_TAX_RATES.reduce((acc, bracket) => acc + bracket.rate, 0) / FEDERAL_TAX_RATES.length) - STATE_TAX_RATES[state]);
-    netWithdrawal = applyTax(totalWithdrawal, state);
+/**
+ * Calculate the gross income needed to achieve a specified net income after taxes.
+ * Uses a binary search method to approximate the gross income.
+ * 
+ * @param netIncome The desired net income after taxes
+ * @param state The state for which to apply state taxes
+ * @returns The estimated gross income required to achieve the specified net income
+ */
+function findGrossIncome(netIncome: number, state: State): number {
+  let lowerBound = netIncome;
+  let upperBound = netIncome * 1.5;
+
+  // Binary search to calculate gross income to the nearest dollar
+  while (upperBound - lowerBound > 1) {
+    const midPoint = (lowerBound + upperBound) / 2;
+    // Calculate the net income from the midpoint gross income
+    const estimatedNetIncome = applyTax(midPoint, state);
+
+    // Adjust bounds based on comparison of estimated and desired
+    if (estimatedNetIncome < netIncome) {
+      lowerBound = midPoint;
+    } else {
+      upperBound = midPoint;
+    }
   }
 
-  return totalWithdrawal;
+  // Average the final bounds
+  return (lowerBound + upperBound) / 2;
 }
