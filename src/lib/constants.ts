@@ -16,12 +16,13 @@ export const STATE_TAX_RATES: Record<State, number> = {
   [State.WI]: 0.05, [State.WY]: 0.00
 };
 
+// 2024 rates from https://www.irs.gov/newsroom/irs-provides-tax-inflation-adjustments-for-tax-year-2024
 export const FEDERAL_TAX_RATES = [
-	{ rate: 0.10, threshold: 10275 },
-	{ rate: 0.12, threshold: 41775 },
-	{ rate: 0.22, threshold: 89075 },
-	{ rate: 0.24, threshold: 170050 },
-	{ rate: 0.32, threshold: 215950 },
-	{ rate: 0.35, threshold: 539900 },
-	{ rate: 0.37, threshold: Infinity },
+	{ rate: 0.10, threshold: 11600 },
+	{ rate: 0.12, threshold: 47150 },
+	{ rate: 0.22, threshold: 100525 },
+	{ rate: 0.24, threshold: 191950 },
+	{ rate: 0.32, threshold: 243725 },
+	{ rate: 0.35, threshold: 609350 },
+	{ rate: 0.37, threshold: Infinity}
 ];
