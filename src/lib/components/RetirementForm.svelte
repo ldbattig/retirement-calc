@@ -1,37 +1,24 @@
 <script lang="ts">
-  import { currentAge, retirementAge, annualIncome, livingExpenses, stockAllocation, bondAllocation, annualInflation, withdrawalRate } from '$lib/store';
-  import { calculateAssets } from '$lib/utils/calculations';
-  import { Input, Label, Card } from 'flowbite-svelte';
-  import {ThumbsUpSolid} from 'flowbite-svelte-icons';
+  import { currentAge, retirementAge, annualIncome, livingExpenses, stockAllocation, bondAllocation, annualInflation, selectedState, taxIncome, taxRetirement } from '$lib/store';
+  import { applyTax } from '$lib/utils/calculations';
+  import { Input, Label, Card, Select, Toggle } from 'flowbite-svelte';
+  import { State } from '$lib/types/state';
+	import RetirementSummary from './RetirementSummary.svelte';
+	import { formatCurrency } from '$lib/utils/utility';
 
-  // Summary data calculated based on user input
-  let totalAssetsAtRetirement = 0;
-  let yearsAssetsWillLast = 0;
+  let annualIncomeAfterTax = 0;
 
-  // Values for grading the number of years that retirement assets will last
-  const maxYears = 30;
-  const minYears = 0;
+  const states = Object.keys(State).map(key => ({
+    value: State[key as keyof typeof State],
+    name: State[key as keyof typeof State]
+  }));
 
   $: {
-    const { totalAssets, yearsLasted } = calculateAssets($currentAge, $retirementAge, $annualIncome, $livingExpenses, $stockAllocation, $annualInflation, $withdrawalRate);
-    totalAssetsAtRetirement = totalAssets;
-    yearsAssetsWillLast = yearsLasted;
-  }
-
-  function getRotationAngle(years: number) {
-    // Normalize years within the range and convert to an angle
-    let normalizedYears = Math.min(Math.max(years, minYears), maxYears);
-    // Calculate the angle
-    return -180 * (1 - (normalizedYears - minYears) / (maxYears - minYears));
-  }
-
-  function formatCurrency(value: number) {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(value);
+    if ($taxIncome) {
+      annualIncomeAfterTax = applyTax($annualIncome, $selectedState);
+    } else {
+      annualIncomeAfterTax = $annualIncome;
+    }
   }
 </script>
 
@@ -53,14 +40,36 @@
 
     <div class="flex space-x-4 mb-4">
       <div class="flex-1">
+        <Label for="state" class="mb-2">State</Label>
+        <Select class="focus:ring-blue-500 focus:border-blue-500" items={states} bind:value={$selectedState} />
+      </div>
+
+      <div class="flex-1">
         <Label for="annualIncome" class="mb-2">Annual Income ($)</Label>
         <Input class="focus:ring-blue-500 focus:border-blue-500" type="number" bind:value={$annualIncome} id="annualIncome" />
-        </div>
+      </div>
 
       <div class="flex-1">
         <Label for="livingExpenses" class="mb-2">Living Expenses ($)</Label>
         <Input class="focus:ring-blue-500 focus:border-blue-500" type="number" bind:value={$livingExpenses} id="livingExpenses" />
-        </div>
+      </div>
+    </div>
+
+    <div class="flex space-x-4 mb-4 items-center">
+      <div class="flex-1">
+        <Label for="taxIncome" class="mb-2">Tax Income</Label>
+        <Toggle color="blue" bind:checked={$taxIncome} id="taxIncome" />
+      </div>
+
+      <div class="flex-1">
+        <Label class="mb-2">Income After Tax</Label>
+        <p class="text-lg font-bold">{formatCurrency(annualIncomeAfterTax)}</p>
+      </div>
+
+      <div class="flex-1">
+        <Label for="taxRetirement" class="mb-2">Tax Retirement</Label>
+        <Toggle color="blue" bind:checked={$taxRetirement} id="taxRetirement" />
+      </div>
     </div>
 
     <div class="mb-4">
@@ -81,36 +90,6 @@
       <p>{$annualInflation}%</p>
     </div>
 
-    <div class="mb-4">
-      <Label for="withdrawalRate" class="mb-2">Withdrawal Rate</Label>
-      <input type="range" id="withdrawalRate" bind:value={$withdrawalRate} min="0" max="10" step="0.1" class="mt-1 block w-full" />
-      <p>{$withdrawalRate}%</p>
-    </div>
-
-    <Card size="md" padding="md" class="text-gray-700">
-      <h3 class="text-2xl font-bold text-center">Summary</h3>
-      <div class="flex">
-        <div class="w-1/2 p-4">
-          <p class="text-lg">Retirement Assets</p>
-          <p class="text-lg font-bold">{formatCurrency(totalAssetsAtRetirement)}</p>
-          <p class="text-lg">Years Assets Will Last</p>
-          <p class="text-lg font-bold">{yearsAssetsWillLast}</p>
-        </div>
-        <div class="w-1/2 p-4 flex items-center justify-center">
-          <div class="flex flex-col items-center">
-          <ThumbsUpSolid size="xl" style={`transform: rotate(${getRotationAngle(yearsAssetsWillLast)}deg); transition: transform 0.3s;`} />
-          <p class="text-lg">
-            {#if yearsAssetsWillLast > 20}
-              You're a wizard!
-            {:else if yearsAssetsWillLast > 10}
-              Not too shabby!
-            {:else}
-              Living on a prayer!
-            {/if}
-          </p>
-          </div>
-        </div>
-      </div>
-    </Card>
+    <RetirementSummary />
   </Card>
 </div>
