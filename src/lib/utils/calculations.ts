@@ -20,15 +20,20 @@ export function calculateAssets(
   livingExpenses: number,
   stockAllocation: number,
   annualInflation: number,
-  state: State
+  state: State,
+  taxIncome: boolean,
+  taxRetirement: boolean
 ): RetirementCalculationResult {
   const yearsToRetirement = retirementAge - currentAge;
-  const taxedIncome = applyTax(annualIncome, state);
   const stockGrowthRate = 0.07;
   const bondGrowthRate = 0.03;
   const annualGrowthRate = (stockAllocation / 100) * stockGrowthRate + ((100 - stockAllocation) / 100) * bondGrowthRate;
   // Deposits are assumed to be biweekly
-  const biweeklyIncome = taxedIncome / 26;
+  let biweeklyIncome = annualIncome / 26;
+  if (taxIncome) {
+    const taxedIncome = applyTax(annualIncome, state);
+    biweeklyIncome = taxedIncome / 26;
+  }
   const biweeklyGrowthRate = annualGrowthRate / 26;
 
   // Accumulate assets until retirement
@@ -46,8 +51,11 @@ export function calculateAssets(
     const inflationMultiplier = Math.pow(1 + annualInflation / 100, yearsInRetirement);
     // Account for inflation
     const annualRetirementIncome = livingExpenses * inflationMultiplier;
-    // Account for taxes
-    const netWithdrawal = findGrossIncome(annualRetirementIncome, state);
+    let netWithdrawal = annualRetirementIncome;
+    if (taxRetirement) {
+      // Account for taxes
+      netWithdrawal = findGrossIncome(annualRetirementIncome, state);
+    }
     remainingAssets -= netWithdrawal;
     remainingAssets *= (1 + annualGrowthRate);
     yearsInRetirement++;
@@ -70,7 +78,7 @@ export function calculateAssets(
  * @param state The state for which to apply state taxes
  * @returns The net income after taxes
  */
-function applyTax(income: number, state: State): number {
+export function applyTax(income: number, state: State): number {
   let remainingIncome = income;
   let taxAmount = 0;
 

@@ -9,6 +9,8 @@ export const stockAllocation = writable(70);
 export const bondAllocation = writable(30);
 export const annualInflation = writable(2.5);
 export const selectedState = writable(State.CA);
+export const taxIncome = writable(true);
+export const taxRetirement = writable(true);
 
 stockAllocation.subscribe(value => {
   if (value !== 100 - get(bondAllocation)) {
