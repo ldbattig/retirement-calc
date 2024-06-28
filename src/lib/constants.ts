@@ -1,19 +1,21 @@
 import { State } from './types/state';
 
+// Rates are averaged for states that don't have a flat rate
+// TODO: expand to reflect income brackets
 export const STATE_TAX_RATES: Record<State, number> = {
-  [State.AL]: 0.05, [State.AK]: 0.00, [State.AZ]: 0.04, [State.AR]: 0.06,
-  [State.CA]: 0.10, [State.CO]: 0.04, [State.CT]: 0.06, [State.DE]: 0.05,
-  [State.FL]: 0.00, [State.GA]: 0.06, [State.HI]: 0.08, [State.ID]: 0.07,
-  [State.IL]: 0.05, [State.IN]: 0.03, [State.IA]: 0.06, [State.KS]: 0.05,
-  [State.KY]: 0.05, [State.LA]: 0.04, [State.ME]: 0.05, [State.MD]: 0.06,
-  [State.MA]: 0.05, [State.MI]: 0.04, [State.MN]: 0.07, [State.MS]: 0.05,
-  [State.MO]: 0.05, [State.MT]: 0.04, [State.NE]: 0.05, [State.NV]: 0.00,
-  [State.NH]: 0.00, [State.NJ]: 0.06, [State.NM]: 0.04, [State.NY]: 0.08,
-  [State.NC]: 0.05, [State.ND]: 0.03, [State.OH]: 0.05, [State.OK]: 0.05,
-  [State.OR]: 0.05, [State.PA]: 0.03, [State.RI]: 0.06, [State.SC]: 0.05,
-  [State.SD]: 0.00, [State.TN]: 0.00, [State.TX]: 0.00, [State.UT]: 0.05,
-  [State.VT]: 0.06, [State.VA]: 0.05, [State.WA]: 0.00, [State.WV]: 0.05,
-  [State.WI]: 0.05, [State.WY]: 0.00
+  [State.AL]: 0.035, [State.AK]: 0.00, [State.AZ]: 0.025, [State.AR]: 0.0345,
+  [State.CA]: 0.072, [State.CO]: 0.044, [State.CT]: 0.04995, [State.DE]: 0.044,
+  [State.FL]: 0.00, [State.GA]: 0.03875, [State.HI]: 0.062, [State.ID]: 0.058,
+  [State.IL]: 0.0495, [State.IN]: 0.0315, [State.IA]: 0.052, [State.KS]: 0.0485,
+  [State.KY]: 0.045, [State.LA]: 0.0305, [State.ME]: 0.06475, [State.MD]: 0.03875,
+  [State.MA]: 0.053, [State.MI]: 0.0435, [State.MN]: 0.0744, [State.MS]: 0.05,
+  [State.MO]: 0.035, [State.MT]: 0.0435, [State.NE]: 0.0497, [State.NV]: 0.00,
+  [State.NH]: 0.00, [State.NJ]: 0.061, [State.NM]: 0.038, [State.NY]: 0.0745,
+  [State.NC]: 0.0475, [State.ND]: 0.01875, [State.OH]: 0.0338, [State.OK]: 0.025,
+  [State.OR]: 0.072, [State.PA]: 0.0307, [State.RI]: 0.0487, [State.SC]: 0.0325,
+  [State.SD]: 0.00, [State.TN]: 0.00, [State.TX]: 0.00, [State.UT]: 0.0485,
+  [State.VT]: 0.0605, [State.VA]: 0.03875, [State.WA]: 0.00, [State.WV]: 0.045,
+  [State.WI]: 0.056, [State.WY]: 0.00
 };
 
 // 2024 rates from https://www.irs.gov/newsroom/irs-provides-tax-inflation-adjustments-for-tax-year-2024

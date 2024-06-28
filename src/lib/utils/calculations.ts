@@ -54,6 +54,7 @@ export function calculateAssets(
     let netWithdrawal = annualRetirementIncome;
     if (taxRetirement) {
       // Account for taxes
+      // TODO: account for capital gains tax 
       netWithdrawal = findGrossIncome(annualRetirementIncome, state);
     }
     remainingAssets -= netWithdrawal;
