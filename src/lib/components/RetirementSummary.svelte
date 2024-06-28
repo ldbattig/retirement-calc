@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { currentAge, retirementAge, annualIncome, livingExpenses, stockAllocation, annualInflation, selectedState, taxIncome, taxRetirement } from '$lib/store';
 	import { calculateAssets } from '$lib/utils/calculations';
-	import { Card } from 'flowbite-svelte';
+	import { Badge, Card } from 'flowbite-svelte';
 	import { ThumbsUpSolid } from 'flowbite-svelte-icons';
 	import { formatCurrency } from '$lib/utils/utility';
 
@@ -25,6 +25,15 @@
 		// Calculate the angle
 		return -180 * (1 - (normalizedYears - minYears) / (maxYears - minYears));
 	}
+
+	function getColor(years: number) {
+		// Normalize years within the range
+		let normalizedYears = Math.min(Math.max(years, minYears), maxYears);
+		// Calculate the color (muted green to muted red)
+		let green = Math.floor((normalizedYears / maxYears) * 150 + 50);
+		let red = Math.floor(((maxYears - normalizedYears) / maxYears) * 150 + 50);
+		return `rgb(${red}, ${green}, 50)`;
+	}
 </script>
 
 <Card size="md" padding="md" class="text-gray-700">
@@ -38,16 +47,18 @@
 		</div>
 		<div class="w-1/2 p-4 flex items-center justify-center">
 			<div class="flex flex-col items-center">
-			<ThumbsUpSolid size="xl" style={`transform: rotate(${getRotationAngle(yearsAssetsWillLast)}deg); transition: transform 0.3s;`} />
-			<p class="text-lg">
-				{#if yearsAssetsWillLast > 20}
-					You're a wizard!
-				{:else if yearsAssetsWillLast > 10}
-					Not too shabby!
-				{:else}
-					Living on a prayer!
-				{/if}
-			</p>
+				<Badge color="dark" rounded large class="!p-3 !font-semibold">
+					<ThumbsUpSolid size="xl" style={`transform: rotate(${getRotationAngle(yearsAssetsWillLast)}deg); transition: transform 0.3s; color: ${getColor(yearsAssetsWillLast)};`} />
+				</Badge>
+				<p class="text-lg">
+					{#if yearsAssetsWillLast > 20}
+						You're a wizard!
+					{:else if yearsAssetsWillLast > 10}
+						Not too shabby!
+					{:else}
+						Living on a prayer!
+					{/if}
+				</p>
 			</div>
 		</div>
 	</div>
