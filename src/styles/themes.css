@@ -1,3 +1,7 @@
+:root {
+	--color-app-background: #f0f8ff;
+}
+
 .dark {
 	--color-app-background: #09061d;
 }
