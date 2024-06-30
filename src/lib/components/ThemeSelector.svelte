@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { darkMode } from '$lib/store';
-	import { Button, Popover } from 'flowbite-svelte';
+	import { Button } from 'flowbite-svelte';
 	import { SunSolid, MoonSolid } from 'flowbite-svelte-icons';
 
 	function toggleTheme() {
@@ -17,5 +17,4 @@
 			<MoonSolid/>
 		{/if}
 	</Button>
-	<Popover class="text-sm" triggeredBy="#darkModeToggle">Toggle dark mode</Popover>
 </div>
