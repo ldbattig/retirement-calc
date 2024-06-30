@@ -11,7 +11,7 @@ export const annualInflation = writable(2.5);
 export const selectedState = writable(State.CA);
 export const taxIncome = writable(true);
 export const taxRetirement = writable(true);
-export const theme = writable('light');
+export const darkMode = writable(false);
 
 stockAllocation.subscribe(value => {
   if (value !== 100 - get(bondAllocation)) {

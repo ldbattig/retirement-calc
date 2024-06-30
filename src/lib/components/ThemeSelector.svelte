@@ -1,29 +1,21 @@
 <script lang="ts">
-	import { theme } from '$lib/store';
-	import { Label, Select } from 'flowbite-svelte';
-	import { onMount } from 'svelte';
+	import { darkMode } from '$lib/store';
+	import { Button, Popover } from 'flowbite-svelte';
+	import { SunSolid, MoonSolid } from 'flowbite-svelte-icons';
 
-	let selectedTheme = 'light';
-	const themes = [
-		'light',
-		'dark',
-	];
-	let themesList = themes.map(theme => {
-		return {
-			value: theme,
-			name: theme.charAt(0).toUpperCase() + theme.slice(1).toLowerCase()
-		};
-	});
-
-	onMount(() => {
-    theme.subscribe(value => {
-      selectedTheme = value;
-      document.documentElement.className = value;
-    });
-  });
+	function toggleTheme() {
+		$darkMode = !$darkMode;
+		document.documentElement.className = $darkMode ? 'dark': 'light';
+	}
 </script>
 
-<div class="text-center max-w-32">
-	<Label class="mb-2" for="theme">Theme</Label>
-	<Select class="focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500" bind:value={$theme} id="theme" items={themesList} />
+<div class="flex flex-wrap items-center">
+	<Button id="darkModeToggle" class="!p-2 bg-blue-500 dark:bg-blue-500 hover:bg-blue-500 dark:hover:bg-blue-500 focus:ring-blue-300 dark:focus:ring-blue-800" on:click={toggleTheme}>
+		{#if $darkMode}
+			<SunSolid/>
+		{:else}
+			<MoonSolid/>
+		{/if}
+	</Button>
+	<Popover class="text-sm" triggeredBy="#darkModeToggle">Toggle dark mode</Popover>
 </div>
