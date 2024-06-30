@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { currentAge, retirementAge, annualIncome, livingExpenses, stockAllocation, bondAllocation, annualInflation, selectedState, taxIncome, taxRetirement } from '$lib/store';
+  import { currentAge, retirementAge, annualIncome, annualExpenses, stockAllocation, bondAllocation, annualInflation, selectedState, taxIncome, taxRetirement } from '$lib/store';
   import { applyTax } from '$lib/utils/calculations';
   import { Input, Label, Card, Select, Toggle, Heading, P, Range } from 'flowbite-svelte';
   import { State } from '$lib/types/state';
@@ -50,8 +50,8 @@
       </div>
 
       <div class="flex-1">
-        <Label for="livingExpenses" class="mb-2">Living Expenses ($)</Label>
-        <Input class="focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500" type="number" bind:value={$livingExpenses} id="livingExpenses" />
+        <Label for="livingExpenses" class="mb-2">Annual Expenses ($)</Label>
+        <Input class="focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500" type="number" bind:value={$annualExpenses} id="livingExpenses" />
       </div>
     </div>
 

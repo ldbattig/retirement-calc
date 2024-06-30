@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { currentAge, retirementAge, annualIncome, livingExpenses, stockAllocation, annualInflation, selectedState, taxIncome, taxRetirement } from '$lib/store';
+	import { currentAge, retirementAge, annualIncome, annualExpenses, stockAllocation, annualInflation, selectedState, taxIncome, taxRetirement } from '$lib/store';
 	import { calculateAssets } from '$lib/utils/calculations';
 	import { Badge, Card, Heading, P } from 'flowbite-svelte';
 	import { ThumbsUpSolid } from 'flowbite-svelte-icons';
@@ -14,7 +14,7 @@
 	const minYears = 0;
 
 	$: {
-		const { totalAssets, yearsLasted } = calculateAssets($currentAge, $retirementAge, $annualIncome, $livingExpenses, $stockAllocation, $annualInflation, $selectedState, $taxIncome, $taxRetirement);
+		const { totalAssets, yearsLasted } = calculateAssets($currentAge, $retirementAge, $annualIncome, $annualExpenses, $stockAllocation, $annualInflation, $selectedState, $taxIncome, $taxRetirement);
 		totalAssetsAtRetirement = totalAssets;
 		yearsAssetsWillLast = yearsLasted;
 	}
@@ -43,7 +43,7 @@
 			<P class="text-lg">Retirement Assets</P>
 			<P class="text-lg font-bold">{formatCurrency(totalAssetsAtRetirement)}</P>
 			<P class="text-lg">Years Assets Will Last</P>
-			<P class="text-lg font-bold">{yearsAssetsWillLast}</P>
+			<P class="text-lg font-bold">{yearsAssetsWillLast === 1000 ? '>': ''}{yearsAssetsWillLast}</P>
 	  </div>
 	  <div class="w-1/2 p-4 flex items-center justify-center">
 			<div class="flex flex-col items-center">
