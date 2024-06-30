@@ -1,7 +1,7 @@
 <script lang="ts">
   import { currentAge, retirementAge, annualIncome, livingExpenses, stockAllocation, bondAllocation, annualInflation, selectedState, taxIncome, taxRetirement } from '$lib/store';
   import { applyTax } from '$lib/utils/calculations';
-  import { Input, Label, Card, Select, Toggle } from 'flowbite-svelte';
+  import { Input, Label, Card, Select, Toggle, Heading, P } from 'flowbite-svelte';
   import { State } from '$lib/types/state';
 	import RetirementSummary from './RetirementSummary.svelte';
 	import { formatCurrency } from '$lib/utils/utility';
@@ -23,71 +23,71 @@
 </script>
 
 <div class="max-w-xl mx-auto">
-  <Card size="md" padding="md" class="text-gray-700">
-    <h1 class="text-center text-2xl font-bold mb-4">Retirement Calculator</h1>
+  <Card size="md" padding="md">
+    <Heading tag="h1" class="text-center text-2xl font-bold mb-4">Retirement Calculator</Heading>
 
     <div class="mb-4">
       <Label for="currentAge" class="mb-2">Current Age</Label>
       <input type="range" id="currentAge" bind:value={$currentAge} min="20" max="100" class="mt-1 block w-full" />
-      <p>{$currentAge}</p>
+      <P>{$currentAge}</P>
     </div>
 
     <div class="mb-4">
       <Label for="retirementAge" class="mb-2">Retirement Age</Label>
       <input type="range" id="retirementAge" bind:value={$retirementAge} min="20" max="100" class="mt-1 block w-full" />
-      <p>{$retirementAge}</p>
+      <P>{$retirementAge}</P>
     </div>
 
     <div class="flex space-x-4 mb-4">
       <div class="flex-1">
         <Label for="state" class="mb-2">State</Label>
-        <Select class="focus:ring-blue-500 focus:border-blue-500" items={states} bind:value={$selectedState} />
+        <Select class="focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500" items={states} bind:value={$selectedState} />
       </div>
 
       <div class="flex-1">
         <Label for="annualIncome" class="mb-2">Annual Income ($)</Label>
-        <Input class="focus:ring-blue-500 focus:border-blue-500" type="number" bind:value={$annualIncome} id="annualIncome" />
+        <Input class="focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500" type="number" bind:value={$annualIncome} id="annualIncome" />
       </div>
 
       <div class="flex-1">
         <Label for="livingExpenses" class="mb-2">Living Expenses ($)</Label>
-        <Input class="focus:ring-blue-500 focus:border-blue-500" type="number" bind:value={$livingExpenses} id="livingExpenses" />
+        <Input class="focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500" type="number" bind:value={$livingExpenses} id="livingExpenses" />
       </div>
     </div>
 
     <div class="flex space-x-4 mb-4 items-center">
       <div class="flex-1">
         <Label for="taxIncome" class="mb-2">Tax Income</Label>
-        <Toggle color="blue" bind:checked={$taxIncome} id="taxIncome" />
+        <Toggle color="blue" bind:checked={$taxIncome} id="taxIncome"/>
       </div>
 
       <div class="flex-1">
         <Label class="mb-2">Income After Tax</Label>
-        <p class="text-lg font-bold">{formatCurrency(annualIncomeAfterTax)}</p>
+        <P class="text-lg font-bold">{formatCurrency(annualIncomeAfterTax)}</P>
       </div>
 
       <div class="flex-1">
         <Label for="taxRetirement" class="mb-2">Tax Retirement</Label>
-        <Toggle color="blue" bind:checked={$taxRetirement} id="taxRetirement" />
+        <Toggle color="blue" bind:checked={$taxRetirement} id="taxRetirement"/>
       </div>
     </div>
 
     <div class="mb-4">
       <Label for="stockAllocation" class="mb-2">Stocks Allocation</Label>
       <input type="range" id="stockAllocation" bind:value={$stockAllocation} min="0" max="100" class="mt-1 block w-full" />
-      <p>{$stockAllocation}%</p>
+      <P>{$stockAllocation}%</P>
     </div>
 
     <div class="mb-4">
       <Label for="bondAllocation" class="mb-2">Bonds Allocation</Label>
       <input type="range" id="bondAllocation" bind:value={$bondAllocation} min="0" max="100" class="mt-1 block w-full" />
-      <p>{$bondAllocation}%</p>
+      <P>{$bondAllocation}%</P>
     </div>
 
     <div class="mb-4">
       <Label for="annualInflation" class="mb-2">Annual Inflation</Label>
       <input type="range" id="annualInflation" bind:value={$annualInflation} min="0" max="10" step="0.1" class="mt-1 block w-full" />
-      <p>{$annualInflation}%</p>
+      <P>{$annualInflation}%</P>
     </div>
 
     <RetirementSummary />

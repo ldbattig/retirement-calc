@@ -1,0 +1,16 @@
+.dark {
+	/* --color-primary: #000000; */
+	--color-secondary: #657786;
+	--color-background: #15202b;
+	--color-app-background: #000000;
+	--color-text: #ffffff;
+}
+
+.light {
+	/* --color-primary: #1da1f2; */
+	--color-secondary: #14171a;
+	--color-background: #ffffff;
+	--color-app-background: #f0f8ff;
+	--color-text: #000000;
+}
+  

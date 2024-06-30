@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { currentAge, retirementAge, annualIncome, livingExpenses, stockAllocation, annualInflation, selectedState, taxIncome, taxRetirement } from '$lib/store';
 	import { calculateAssets } from '$lib/utils/calculations';
-	import { Badge, Card } from 'flowbite-svelte';
+	import { Badge, Card, Heading, P } from 'flowbite-svelte';
 	import { ThumbsUpSolid } from 'flowbite-svelte-icons';
 	import { formatCurrency } from '$lib/utils/utility';
 
@@ -36,29 +36,29 @@
 	}
 </script>
 
-<Card size="md" padding="md" class="text-gray-700">
-	<h3 class="text-2xl font-bold text-center">Summary</h3>
+<Card size="md" padding="md">
+	<Heading tag="h3" class="text-2xl font-bold text-center">Summary</Heading>
 	<div class="flex">
-		<div class="w-1/2 p-4">
-			<p class="text-lg">Retirement Assets</p>
-			<p class="text-lg font-bold">{formatCurrency(totalAssetsAtRetirement)}</p>
-			<p class="text-lg">Years Assets Will Last</p>
-			<p class="text-lg font-bold">{yearsAssetsWillLast}</p>
-		</div>
-		<div class="w-1/2 p-4 flex items-center justify-center">
+	  <div class="w-1/2 p-4">
+			<P class="text-lg">Retirement Assets</P>
+			<P class="text-lg font-bold">{formatCurrency(totalAssetsAtRetirement)}</P>
+			<P class="text-lg">Years Assets Will Last</P>
+			<P class="text-lg font-bold">{yearsAssetsWillLast}</P>
+	  </div>
+	  <div class="w-1/2 p-4 flex items-center justify-center">
 			<div class="flex flex-col items-center">
 				<Badge color="dark" rounded large class="!p-3 !font-semibold">
 					<ThumbsUpSolid size="xl" style={`transform: rotate(${getRotationAngle(yearsAssetsWillLast)}deg); transition: transform 0.3s; color: ${getColor(yearsAssetsWillLast)};`} />
 				</Badge>
-				<p class="text-lg">
-					{#if yearsAssetsWillLast > 20}
-						You're a wizard!
-					{:else if yearsAssetsWillLast > 10}
-						Not too shabby!
-					{:else}
-						Living on a prayer!
-					{/if}
-				</p>
+				<P class="text-lg">
+				{#if yearsAssetsWillLast > 20}
+					You're a wizard!
+				{:else if yearsAssetsWillLast > 10}
+					Not too shabby!
+				{:else}
+					Living on a prayer!
+				{/if}
+				</P>
 			</div>
 		</div>
 	</div>

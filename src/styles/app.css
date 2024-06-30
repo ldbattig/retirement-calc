@@ -1,0 +1,9 @@
+@import './themes.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+	background-color: var(--color-app-background);
+	color: var(--color-text);
+}
