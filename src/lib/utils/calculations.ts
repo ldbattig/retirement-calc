@@ -38,10 +38,14 @@ export function calculateAssets(
 
   // Accumulate assets until retirement
   let assetsAtRetirement = 0;
-  const biweeklySavings = biweeklyIncome - (livingExpenses / 26);
-  for (let i = 0; i < yearsToRetirement * 26; i++) {
-    assetsAtRetirement += biweeklySavings;
-    assetsAtRetirement *= (1 + biweeklyGrowthRate);
+  for (let i = 0; i < yearsToRetirement; i++) {
+    const inflationMultiplier = i === 0 ? 1 : Math.pow(1 + annualInflation / 100, i);
+    const adjustedLivingExpenses = livingExpenses * inflationMultiplier;
+    const biweeklySavings = biweeklyIncome - (adjustedLivingExpenses / 26);
+    for (let j = 0; j < 26; j++) {
+      assetsAtRetirement += biweeklySavings;
+      assetsAtRetirement *= (1 + biweeklyGrowthRate);
+    }
   }
 
   // Withdraw from assets during retirement
@@ -68,7 +72,8 @@ export function calculateAssets(
 
   return {
     totalAssets: assetsAtRetirement,
-    yearsLasted: Math.max(0, yearsInRetirement - 1) // Subtract one because the loop increments one extra year before going negative
+    // Subtract one because the loop increments one extra year before going negative
+    yearsLasted: Math.max(0, yearsInRetirement - 1)
   };
 }
 
@@ -80,12 +85,12 @@ export function calculateAssets(
  * @returns The net income after taxes
  */
 export function applyTax(income: number, state: TaxRegion) {
-  // account for deductions
+  // Account for deductions
   const federalTaxableIncome = income - FEDERAL_TAX_DEDUCTION;
   let federalTaxAmount = 0;
   let previousThreshold = 0;
 
-  // add up the federal tax based on the tax brackets
+  // Add up the federal tax based on the tax brackets
   for (const bracket of FEDERAL_TAX_RATES) {
     if (federalTaxableIncome > bracket.threshold) {
       federalTaxAmount += (bracket.threshold - previousThreshold) * bracket.rate;
@@ -97,12 +102,12 @@ export function applyTax(income: number, state: TaxRegion) {
   }
 
   const stateInfo = STATE_TAX_RATES[state];
-  // account for deductions
+  // Account for deductions
   const stateTaxableIncome = income - stateInfo.standardDeduction - stateInfo.personalExemption;
   let stateTaxAmount = 0;
   previousThreshold = 0;
 
-  // add up the state tax based on the brackets (some states have a flat rate or no income tax)
+  // Add up the state tax based on the brackets (some states have a flat rate or no income tax)
   for (const bracket of stateInfo.brackets) {
     if (stateTaxableIncome > bracket.threshold) {
       stateTaxAmount += (bracket.threshold - previousThreshold) * bracket.rate;
