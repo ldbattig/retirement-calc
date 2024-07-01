@@ -1,6 +1,6 @@
 import type { RetirementCalculationResult } from "$lib/types/retirementCalculationResult";
-import { STATE_TAX_RATES, FEDERAL_TAX_RATES } from "$lib/constants";
-import type { State } from "$lib/types/state";
+import { STATE_TAX_RATES, FEDERAL_TAX_RATES, FEDERAL_TAX_DEDUCTION } from "$lib/constants";
+import type { TaxRegion } from "$lib/types/state";
 
 /**
  * Calculate retirement assets and the years they will last.
@@ -20,7 +20,7 @@ export function calculateAssets(
   livingExpenses: number,
   stockAllocation: number,
   annualInflation: number,
-  state: State,
+  state: TaxRegion,
   taxIncome: boolean,
   taxRetirement: boolean
 ): RetirementCalculationResult {
@@ -79,30 +79,44 @@ export function calculateAssets(
  * @param state The state for which to apply state taxes
  * @returns The net income after taxes
  */
-export function applyTax(income: number, state: State): number {
-  let remainingIncome = income;
-  let taxAmount = 0;
+export function applyTax(income: number, state: TaxRegion) {
+  // account for deductions
+  const federalTaxableIncome = income - FEDERAL_TAX_DEDUCTION;
+  let federalTaxAmount = 0;
+  let previousThreshold = 0;
 
-  // Calculate federal tax
+  // add up the federal tax based on the tax brackets
   for (const bracket of FEDERAL_TAX_RATES) {
-    if (remainingIncome > bracket.threshold) {
-      // Tax up to the threshold
-      taxAmount += bracket.threshold * bracket.rate;
-      remainingIncome -= bracket.threshold;
+    if (federalTaxableIncome > bracket.threshold) {
+      federalTaxAmount += (bracket.threshold - previousThreshold) * bracket.rate;
+      previousThreshold = bracket.threshold;
     } else {
-      // Tax the remaining income
-      taxAmount += remainingIncome * bracket.rate;
+      federalTaxAmount += (federalTaxableIncome - previousThreshold) * bracket.rate;
       break;
     }
   }
 
-  // Calculate state tax
-  const stateTaxRate = STATE_TAX_RATES[state];
-  taxAmount += income * stateTaxRate; // Add state tax
+  const stateInfo = STATE_TAX_RATES[state];
+  // account for deductions
+  const stateTaxableIncome = income - stateInfo.standardDeduction - stateInfo.personalExemption;
+  let stateTaxAmount = 0;
+  previousThreshold = 0;
 
-  return income - taxAmount; // Return net income after all taxes
+  // add up the state tax based on the brackets (some states have a flat rate or no income tax)
+  for (const bracket of stateInfo.brackets) {
+    if (stateTaxableIncome > bracket.threshold) {
+      stateTaxAmount += (bracket.threshold - previousThreshold) * bracket.rate;
+      previousThreshold = bracket.threshold;
+    } else {
+      stateTaxAmount += (stateTaxableIncome - previousThreshold) * bracket.rate;
+      break;
+    }
+  }
+
+  // Return net income
+  const totalTaxAmount = federalTaxAmount + stateTaxAmount;
+  return income - totalTaxAmount;
 }
-
 
 /**
  * Calculate the gross income needed to achieve a specified net income after taxes.
@@ -112,7 +126,7 @@ export function applyTax(income: number, state: State): number {
  * @param state The state for which to apply state taxes
  * @returns The estimated gross income required to achieve the specified net income
  */
-function findGrossIncome(netIncome: number, state: State): number {
+function findGrossIncome(netIncome: number, state: TaxRegion): number {
   let lowerBound = netIncome;
   let upperBound = netIncome * 1.5;
 

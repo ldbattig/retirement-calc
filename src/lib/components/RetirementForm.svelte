@@ -2,16 +2,18 @@
   import { currentAge, retirementAge, annualIncome, annualExpenses, stockAllocation, bondAllocation, annualInflation, selectedState, taxIncome, taxRetirement } from '$lib/store';
   import { applyTax } from '$lib/utils/calculations';
   import { Input, Label, Card, Select, Toggle, Heading, P, Range } from 'flowbite-svelte';
-  import { State } from '$lib/types/state';
+  import { TaxRegion } from '$lib/types/state';
 	import RetirementSummary from './RetirementSummary.svelte';
 	import { formatCurrency } from '$lib/utils/utility';
 
   let annualIncomeAfterTax = 0;
 
-  const states = Object.keys(State).map(key => ({
-    value: State[key as keyof typeof State],
-    name: State[key as keyof typeof State]
-  }));
+  const states = Object.keys(TaxRegion)
+    .map(key => ({
+      value: TaxRegion[key as keyof typeof TaxRegion],
+      name: TaxRegion[key as keyof typeof TaxRegion]
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   $: {
     if ($taxIncome) {
