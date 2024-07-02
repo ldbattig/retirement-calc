@@ -1,10 +1,12 @@
 <script lang="ts">
-  import { currentAge, retirementAge, annualIncome, livingExpenses, stockAllocation, bondAllocation, annualInflation, selectedState, taxIncome, taxRetirement } from '$lib/store';
+  import { currentAge, retirementAge, annualIncome, livingExpenses, stockAllocation, bondAllocation, annualInflation, selectedState, taxIncome, taxRetirement, darkMode } from '$lib/store';
   import { applyTax } from '$lib/utils/calculations';
-  import { Input, Label, Card, Select, Toggle, Heading, P, Range } from 'flowbite-svelte';
+  import { Input, Label, Card, Select, Toggle, Heading, P, Range, Button } from 'flowbite-svelte';
   import { State } from '$lib/types/state';
 	import RetirementSummary from './RetirementSummary.svelte';
 	import { formatCurrency } from '$lib/utils/utility';
+	import { RefreshOutline } from 'flowbite-svelte-icons';
+	import { CURRENT_AGE_DEFAULT, RETIREMENT_AGE_DEFAULT, ANNUAL_INCOME_DEFAULT, LIVING_EXPENSES_DEFAULT, STOCK_ALLOCATION_DEFAULT, BOND_ALLOCATION_DEFAULT, ANNUAL_INFLATION_DEFAULT, SELECTED_STATE_DEFAULT, TAX_INCOME_DEFAULT, TAX_RETIREMENT_DEFAULT, DARK_MODE_DEFAULT } from '$lib/constants';
 
   let annualIncomeAfterTax = 0;
 
@@ -20,11 +22,30 @@
       annualIncomeAfterTax = $annualIncome;
     }
   }
+
+  function resetStore() {
+    currentAge.set(CURRENT_AGE_DEFAULT);
+    retirementAge.set(RETIREMENT_AGE_DEFAULT);
+    annualIncome.set(ANNUAL_INCOME_DEFAULT);
+    livingExpenses.set(LIVING_EXPENSES_DEFAULT);
+    stockAllocation.set(STOCK_ALLOCATION_DEFAULT);
+    bondAllocation.set(BOND_ALLOCATION_DEFAULT);
+    annualInflation.set(ANNUAL_INFLATION_DEFAULT);
+    selectedState.set(SELECTED_STATE_DEFAULT);
+    taxIncome.set(TAX_INCOME_DEFAULT);
+    taxRetirement.set(TAX_RETIREMENT_DEFAULT);
+    darkMode.set(DARK_MODE_DEFAULT);
+  }
 </script>
 
 <div class="max-w-xl mx-auto">
   <Card size="md" padding="md">
-    <Heading tag="h1" class="text-center text-2xl font-bold mb-4">Retirement Calculator</Heading>
+    <div class="relative">
+      <Heading tag="h1" class="text-center text-2xl font-bold mb-4">Retirement Calculator</Heading>
+      <Button on:click={resetStore} class="!p-2 absolute top-0 right-0 bg-blue-500 dark:bg-blue-500 hover:bg-blue-500 dark:hover:bg-blue-500 focus:ring-blue-300 dark:focus:ring-blue-800">
+        <RefreshOutline/>
+      </Button>
+    </div>
 
     <div class="mb-4">
       <Label for="currentAge" class="mb-2">Current Age</Label>

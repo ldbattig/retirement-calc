@@ -1,17 +1,17 @@
 import { get, writable } from 'svelte/store';
-import { State } from './types/state';
+import { CURRENT_AGE_DEFAULT, RETIREMENT_AGE_DEFAULT, ANNUAL_INCOME_DEFAULT, LIVING_EXPENSES_DEFAULT, STOCK_ALLOCATION_DEFAULT, BOND_ALLOCATION_DEFAULT, ANNUAL_INFLATION_DEFAULT, SELECTED_STATE_DEFAULT, TAX_INCOME_DEFAULT, TAX_RETIREMENT_DEFAULT, DARK_MODE_DEFAULT } from './constants';
 
-export const currentAge = writable(30);
-export const retirementAge = writable(65);
-export const annualIncome = writable(60000);
-export const livingExpenses = writable(40000);
-export const stockAllocation = writable(70);
-export const bondAllocation = writable(30);
-export const annualInflation = writable(2.5);
-export const selectedState = writable(State.CA);
-export const taxIncome = writable(true);
-export const taxRetirement = writable(true);
-export const darkMode = writable(false);
+export const currentAge = writable(CURRENT_AGE_DEFAULT);
+export const retirementAge = writable(RETIREMENT_AGE_DEFAULT);
+export const annualIncome = writable(ANNUAL_INCOME_DEFAULT);
+export const livingExpenses = writable(LIVING_EXPENSES_DEFAULT);
+export const stockAllocation = writable(STOCK_ALLOCATION_DEFAULT);
+export const bondAllocation = writable(BOND_ALLOCATION_DEFAULT);
+export const annualInflation = writable(ANNUAL_INFLATION_DEFAULT);
+export const selectedState = writable(SELECTED_STATE_DEFAULT);
+export const taxIncome = writable(TAX_INCOME_DEFAULT);
+export const taxRetirement = writable(TAX_RETIREMENT_DEFAULT);
+export const darkMode = writable(DARK_MODE_DEFAULT);
 
 stockAllocation.subscribe(value => {
   if (value !== 100 - get(bondAllocation)) {
