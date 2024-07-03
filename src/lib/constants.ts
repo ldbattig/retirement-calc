@@ -28,3 +28,15 @@ export const FEDERAL_TAX_RATES = [
 	{ rate: 0.35, threshold: 609350 },
 	{ rate: 0.37, threshold: Infinity}
 ];
+
+export const CURRENT_AGE_DEFAULT = 30;
+export const RETIREMENT_AGE_DEFAULT = 65;
+export const ANNUAL_INCOME_DEFAULT = 60000;
+export const LIVING_EXPENSES_DEFAULT = 40000;
+export const STOCK_ALLOCATION_DEFAULT = 70;
+export const BOND_ALLOCATION_DEFAULT = 30;
+export const ANNUAL_INFLATION_DEFAULT = 2.5;
+export const SELECTED_STATE_DEFAULT = State.CA;
+export const TAX_INCOME_DEFAULT = true;
+export const TAX_RETIREMENT_DEFAULT = true;
+export const DARK_MODE_DEFAULT = false;

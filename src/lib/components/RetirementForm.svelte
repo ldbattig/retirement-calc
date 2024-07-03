@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { currentAge, retirementAge, annualIncome, livingExpenses, stockAllocation, bondAllocation, annualInflation, selectedState, taxIncome, taxRetirement } from '$lib/store';
+  import { currentAge, retirementAge, annualIncome, livingExpenses, stockAllocation, bondAllocation, annualInflation, selectedState, taxIncome, taxRetirement, resetStore } from '$lib/store';
   import { applyTax } from '$lib/utils/calculations';
-  import { Input, Label, Card, Select, Toggle, Heading, P, Range } from 'flowbite-svelte';
+  import { Input, Label, Card, Select, Toggle, Heading, P, Range, Button } from 'flowbite-svelte';
   import { State } from '$lib/types/state';
 	import RetirementSummary from './RetirementSummary.svelte';
 	import { formatCurrency } from '$lib/utils/utility';
+	import { RefreshOutline } from 'flowbite-svelte-icons';
 
   let annualIncomeAfterTax = 0;
 
@@ -24,7 +25,14 @@
 
 <div class="max-w-xl mx-auto">
   <Card size="md" padding="md">
-    <Heading tag="h1" class="text-center text-2xl font-bold mb-4">Retirement Calculator</Heading>
+    <div class="flex items-center justify-between mb-4">
+      <!-- Spacer div to keep the Heading centered -->
+      <div class="w-9 flex-shrink-0"></div>
+      <Heading tag="h1" class="text-center text-2xl font-bold">Retirement Calculator</Heading>
+      <Button on:click={resetStore} class="!p-2 bg-blue-500 dark:bg-blue-500 hover:bg-blue-500 dark:hover:bg-blue-500 focus:ring-blue-300 dark:focus:ring-blue-800">
+        <RefreshOutline/>
+      </Button>
+    </div>
 
     <div class="mb-4">
       <Label for="currentAge" class="mb-2">Current Age</Label>
