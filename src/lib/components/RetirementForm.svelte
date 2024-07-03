@@ -40,9 +40,11 @@
 
 <div class="max-w-xl mx-auto">
   <Card size="md" padding="md">
-    <div class="relative">
-      <Heading tag="h1" class="text-center text-2xl font-bold mb-4">Retirement Calculator</Heading>
-      <Button on:click={resetStore} class="!p-2 absolute top-0 right-0 bg-blue-500 dark:bg-blue-500 hover:bg-blue-500 dark:hover:bg-blue-500 focus:ring-blue-300 dark:focus:ring-blue-800">
+    <div class="flex items-center justify-between mb-4">
+      <!-- Spacer div to keep the Heading centered -->
+      <div class="w-9 flex-shrink-0"></div>
+      <Heading tag="h1" class="text-center text-2xl font-bold">Retirement Calculator</Heading>
+      <Button on:click={resetStore} class="!p-2 bg-blue-500 dark:bg-blue-500 hover:bg-blue-500 dark:hover:bg-blue-500 focus:ring-blue-300 dark:focus:ring-blue-800">
         <RefreshOutline/>
       </Button>
     </div>
