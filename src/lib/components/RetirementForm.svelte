@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { currentAge, retirementAge, annualIncome, livingExpenses, stockAllocation, bondAllocation, annualInflation, selectedState, taxIncome, taxRetirement, darkMode, resetStore } from '$lib/store';
+  import { currentAge, retirementAge, annualIncome, livingExpenses, stockAllocation, bondAllocation, annualInflation, selectedState, taxIncome, taxRetirement, resetStore } from '$lib/store';
   import { applyTax } from '$lib/utils/calculations';
   import { Input, Label, Card, Select, Toggle, Heading, P, Range, Button } from 'flowbite-svelte';
   import { State } from '$lib/types/state';
