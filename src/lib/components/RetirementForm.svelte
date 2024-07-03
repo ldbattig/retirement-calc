@@ -1,12 +1,11 @@
 <script lang="ts">
-  import { currentAge, retirementAge, annualIncome, livingExpenses, stockAllocation, bondAllocation, annualInflation, selectedState, taxIncome, taxRetirement, darkMode } from '$lib/store';
+  import { currentAge, retirementAge, annualIncome, livingExpenses, stockAllocation, bondAllocation, annualInflation, selectedState, taxIncome, taxRetirement, darkMode, resetStore } from '$lib/store';
   import { applyTax } from '$lib/utils/calculations';
   import { Input, Label, Card, Select, Toggle, Heading, P, Range, Button } from 'flowbite-svelte';
   import { State } from '$lib/types/state';
 	import RetirementSummary from './RetirementSummary.svelte';
 	import { formatCurrency } from '$lib/utils/utility';
 	import { RefreshOutline } from 'flowbite-svelte-icons';
-	import { CURRENT_AGE_DEFAULT, RETIREMENT_AGE_DEFAULT, ANNUAL_INCOME_DEFAULT, LIVING_EXPENSES_DEFAULT, STOCK_ALLOCATION_DEFAULT, BOND_ALLOCATION_DEFAULT, ANNUAL_INFLATION_DEFAULT, SELECTED_STATE_DEFAULT, TAX_INCOME_DEFAULT, TAX_RETIREMENT_DEFAULT, DARK_MODE_DEFAULT } from '$lib/constants';
 
   let annualIncomeAfterTax = 0;
 
@@ -21,20 +20,6 @@
     } else {
       annualIncomeAfterTax = $annualIncome;
     }
-  }
-
-  function resetStore() {
-    currentAge.set(CURRENT_AGE_DEFAULT);
-    retirementAge.set(RETIREMENT_AGE_DEFAULT);
-    annualIncome.set(ANNUAL_INCOME_DEFAULT);
-    livingExpenses.set(LIVING_EXPENSES_DEFAULT);
-    stockAllocation.set(STOCK_ALLOCATION_DEFAULT);
-    bondAllocation.set(BOND_ALLOCATION_DEFAULT);
-    annualInflation.set(ANNUAL_INFLATION_DEFAULT);
-    selectedState.set(SELECTED_STATE_DEFAULT);
-    taxIncome.set(TAX_INCOME_DEFAULT);
-    taxRetirement.set(TAX_RETIREMENT_DEFAULT);
-    darkMode.set(DARK_MODE_DEFAULT);
   }
 </script>
 
