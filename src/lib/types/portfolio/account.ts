@@ -1,3 +1,4 @@
+import { MS_PER_WEEK, MS_PER_YEAR } from "$lib/constants";
 import type { Bond } from "./bond";
 import type { BondTransactionResult } from "./bondTransactionResult";
 import type { Portfolio } from "./portfolio";
@@ -31,8 +32,7 @@ export class Account implements Portfolio {
   }
 
   sellStock(amount: number, sellTimeYears: number): StockTransactionResult {
-    const totalStockValue = this.stocks.reduce((sum, stock) => sum + stock.currentValue * stock.quantity, 0);
-    
+    const totalStockValue = this.getStockValue();
     if (amount > totalStockValue) {
       return { shortTermGains: 0, longTermGains: 0, insufficientAssets: true };
     }
@@ -42,24 +42,25 @@ export class Account implements Portfolio {
     let shortTermGains = 0;
     let longTermGains = 0;
 
-    while (remainingAmount > 0 && this.stocks.length > 0) {
-      const stock = this.stocks[0];
+    for (let i = 0; i < this.stocks.length && remainingAmount > 0; i++) {
+      const stock = this.stocks[i];
       const stockValue = stock.currentValue * stock.quantity;
       const holdingPeriod = sellTime - stock.purchaseTime;
 
       if (stockValue <= remainingAmount) {
         const gain = (stock.currentValue - stock.purchasePrice) * stock.quantity;
-        if (holdingPeriod > 365 * 24 * 60 * 60 * 1000) {
+        if (holdingPeriod > MS_PER_YEAR) {
           longTermGains += gain;
         } else {
           shortTermGains += gain;
         }
         remainingAmount -= stockValue;
-        this.stocks.shift();
+        this.stocks.splice(i, 1);
+        i--;
       } else {
         const quantityToSell = remainingAmount / stock.currentValue;
         const gain = (stock.currentValue - stock.purchasePrice) * quantityToSell;
-        if (holdingPeriod > 365 * 24 * 60 * 60 * 1000) {
+        if (holdingPeriod > MS_PER_YEAR) {
           longTermGains += gain;
         } else {
           shortTermGains += gain;
@@ -73,7 +74,7 @@ export class Account implements Portfolio {
   }
 
   sellBond(amount: number): BondTransactionResult {
-    const totalBondValue = this.bonds.reduce((sum, bond) => sum + bond.currentValue * bond.quantity, 0);
+    const totalBondValue = this.getBondValue();
 
     if (amount > totalBondValue) {
       return { taxableAmount: 0, insufficientAssets: true };
@@ -82,15 +83,16 @@ export class Account implements Portfolio {
     let remainingAmount = amount;
     let taxableAmount = 0;
 
-    while (remainingAmount > 0 && this.bonds.length > 0) {
-      const bond = this.bonds[0];
+    for (let i = 0; i < this.bonds.length && remainingAmount > 0; i++) {
+      const bond = this.bonds[i];
       const bondValue = bond.currentValue * bond.quantity;
 
       if (bondValue <= remainingAmount) {
         const gain = (bond.currentValue - bond.purchasePrice) * bond.quantity;
         taxableAmount += gain;
         remainingAmount -= bondValue;
-        this.bonds.shift();
+        this.bonds.splice(i, 1);
+        i--;
       } else {
         const quantityToSell = remainingAmount / bond.currentValue;
         const gain = (bond.currentValue - bond.purchasePrice) * quantityToSell;
@@ -104,19 +106,19 @@ export class Account implements Portfolio {
   }
 
   applyGrowth(stockGrowth: number, bondGrowth: number) {
+    const stockMultiplier = 1 + stockGrowth;
+    const bondMultiplier = 1 + bondGrowth;
+
     this.stocks.forEach(stock => {
-      stock.currentValue *= (1 + stockGrowth);
+      stock.currentValue *= stockMultiplier;
     });
-  
     this.bonds.forEach(bond => {
-      bond.currentValue *= (1 + bondGrowth);
+      bond.currentValue *= bondMultiplier;
     });
   }
 
   private calculateTimeInMilliseconds(years: number, weeks: number): number {
-    const millisecondsPerYear = 365 * 24 * 60 * 60 * 1000;
-    const millisecondsPerWeek = 7 * 24 * 60 * 60 * 1000;
-    return years * millisecondsPerYear + weeks * millisecondsPerWeek;
+    return years * MS_PER_YEAR + weeks * MS_PER_WEEK;
   }
 
   clone(): Account {
@@ -125,5 +127,4 @@ export class Account implements Portfolio {
     clonedAccount.bonds = this.bonds.map(bond => ({ ...bond }));
     return clonedAccount;
   }
-  
 }

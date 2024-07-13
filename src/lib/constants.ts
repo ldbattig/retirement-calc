@@ -1,6 +1,9 @@
 import { TaxRegion } from './types/tax/state';
 import type { StateTaxInfo } from './types/tax/stateTaxInfo';
 
+export const MS_PER_YEAR = 365 * 24 * 60 * 60 * 1000;
+export const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
+
 // 2024 rates from https://www.irs.gov/newsroom/irs-provides-tax-inflation-adjustments-for-tax-year-2024
 export const FEDERAL_TAX_RATES = [
 	{ rate: 0.10, threshold: 11600 },

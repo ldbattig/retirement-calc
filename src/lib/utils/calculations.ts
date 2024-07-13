@@ -45,10 +45,12 @@ export function calculateAssets(
     const inflationMultiplier = i === 0 ? 1 : Math.pow(1 + annualInflation / 100, i);
     const adjustedLivingExpenses = livingExpenses * inflationMultiplier;
     const biweeklySavings = biweeklyIncome - (adjustedLivingExpenses / 26);
+    const bondBuy = bondProportion * biweeklySavings;
+    const stockBuy = stockProportion * biweeklySavings;
     for (let j = 0; j < 26; j++) {
       retirementAccount.applyGrowth(biweeklyStockGrowthRate, biweeklyBondGrowthRate);
-      retirementAccount.buyBond(bondProportion * biweeklySavings);
-      retirementAccount.buyStock(stockProportion * biweeklySavings, i, j * 2);
+      retirementAccount.buyBond(bondBuy);
+      retirementAccount.buyStock(stockBuy, i, j * 2);
     }
   }
 
@@ -75,7 +77,7 @@ export function calculateAssets(
 
   return {
     totalAssets: retirementAssetsBackup,
-    yearsLasted: Math.max(0, yearsInRetirement)
+    yearsLasted: yearsInRetirement
   };
 }
 
@@ -166,8 +168,7 @@ function findGrossIncome(
   taxWithdrawals: boolean
 ): Account {
   let lowerBound = netIncome;
-  let upperBound = netIncome * 1.5;
-
+  let upperBound = netIncome * 1.25;
   let tempAccount = new Account();
   
   // Binary search to calculate gross income to the nearest dollar
