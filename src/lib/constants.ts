@@ -1,5 +1,5 @@
-import { TaxRegion } from './types/state';
-import type { StateTaxInfo } from './types/stateTaxInfo';
+import { TaxRegion } from './types/tax/state';
+import type { StateTaxInfo } from './types/tax/stateTaxInfo';
 
 // 2024 rates from https://www.irs.gov/newsroom/irs-provides-tax-inflation-adjustments-for-tax-year-2024
 export const FEDERAL_TAX_RATES = [

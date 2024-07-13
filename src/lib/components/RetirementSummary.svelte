@@ -56,7 +56,7 @@
 				{:else if yearsAssetsWillLast > 10}
 					Not too shabby!
 				{:else}
-					Living on a prayer!
+					Short and sweet!
 				{/if}
 				</P>
 			</div>

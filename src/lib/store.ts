@@ -1,10 +1,10 @@
 import { get, writable } from 'svelte/store';
-import { TaxRegion } from './types/state';
+import { TaxRegion } from './types/tax/state';
 
 export const currentAge = writable(30);
 export const retirementAge = writable(65);
 export const annualIncome = writable(60000);
-export const annualExpenses = writable(40000);
+export const annualExpenses = writable(35000);
 export const stockAllocation = writable(70);
 export const bondAllocation = writable(30);
 export const annualInflation = writable(2.5);
