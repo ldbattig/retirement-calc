@@ -1,10 +1,11 @@
 <script lang="ts">
   import { currentAge, retirementAge, annualIncome, annualExpenses, stockAllocation, bondAllocation, annualInflation, selectedState, taxIncome, taxRetirement } from '$lib/store';
   import { applyTax } from '$lib/utils/calculations';
-  import { Input, Label, Card, Select, Toggle, Heading, P, Range } from 'flowbite-svelte';
+  import { Input, Label, Card, Select, Toggle, Heading, P, Range, Button, Popover } from 'flowbite-svelte';
   import { TaxRegion } from '$lib/types/tax/state';
 	import RetirementSummary from './RetirementSummary.svelte';
 	import { formatCurrency } from '$lib/utils/utility';
+	import { InfoCircleOutline } from 'flowbite-svelte-icons';
 
   let annualIncomeAfterTax = 0;
 
@@ -59,9 +60,16 @@
 
     <div class="flex space-x-4 mb-4 items-center">
       <div class="flex-1">
-        <Label for="taxIncome" class="mb-2">Tax Income</Label>
-        <Toggle color="blue" bind:checked={$taxIncome} id="taxIncome"/>
+        <div class="flex items-center space-x-2">
+          <Label for="taxIncome">Tax Income</Label>
+          <Button id="b1" pill={true} class="!p-0 bg-blue-500 dark:bg-blue-500 hover:bg-blue-500 dark:hover:bg-blue-500 focus:ring-blue-300 dark:focus:ring-blue-800">
+            <InfoCircleOutline/>
+          </Button>
+          <Popover class="w-64 text-sm" title="Income Tax Explanation" triggeredBy="#b1">Federal and state income tax will be applied to the annual income.</Popover>
+        </div>
+        <Toggle color="blue" bind:checked={$taxIncome} id="taxIncome" class="mt-2"/>
       </div>
+      
 
       <div class="flex-1">
         <Label class="mb-2">Income After Tax</Label>
@@ -69,8 +77,14 @@
       </div>
 
       <div class="flex-1">
-        <Label for="taxRetirement" class="mb-2">Tax Retirement</Label>
-        <Toggle color="blue" bind:checked={$taxRetirement} id="taxRetirement"/>
+        <div class="flex items-center space-x-2">
+          <Label for="taxRetirement">Tax Retirement</Label>
+          <Button id="b2" pill={true} class="!p-0 bg-blue-500 dark:bg-blue-500 hover:bg-blue-500 dark:hover:bg-blue-500 focus:ring-blue-300 dark:focus:ring-blue-800">
+            <InfoCircleOutline/>
+          </Button>
+          <Popover class="w-64 text-sm" title="Retirement Tax Explanation" triggeredBy="#b2">Capital gains tax will be applied to stock liquidations. Federal and state income tax will be applied to bond liquidations.</Popover>
+        </div>
+        <Toggle color="blue" bind:checked={$taxRetirement} id="taxRetirement" class="mt-2"/>
       </div>
     </div>
 
