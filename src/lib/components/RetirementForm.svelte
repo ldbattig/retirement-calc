@@ -2,7 +2,7 @@
   import { currentAge, retirementAge, annualIncome, annualExpenses, stockAllocation, bondAllocation, annualInflation, selectedState, taxIncome, taxRetirement } from '$lib/store';
   import { applyTax } from '$lib/utils/calculations';
   import { Input, Label, Card, Select, Toggle, Heading, P, Range, Button, Popover } from 'flowbite-svelte';
-  import { TaxRegion } from '$lib/types/tax/state';
+  import { TaxRegion } from '$lib/types/tax/taxRegion';
 	import RetirementSummary from './RetirementSummary.svelte';
 	import { formatCurrency } from '$lib/utils/utility';
 	import { InfoCircleOutline } from 'flowbite-svelte-icons';

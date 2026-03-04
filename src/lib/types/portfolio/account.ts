@@ -19,26 +19,22 @@ export class Account implements Portfolio {
   getStockValue = () => this.stocks.reduce((sum, stock) => sum + stock.currentValue * stock.quantity, 0)
 
   buyStock(totalValue: number, purchaseTimeYears: number, purchaseTimeWeeks: number) {
-    const purchasePrice = 100; // Assume a fixed cost per stock
-    const quantity = totalValue / purchasePrice;
     const purchaseTime = this.calculateTimeInMilliseconds(purchaseTimeYears, purchaseTimeWeeks);
-    this.stocks.push({ purchasePrice, purchaseTime, currentValue: purchasePrice, quantity });
+    this.stocks.push({ purchasePrice: totalValue, purchaseTime, currentValue: totalValue, quantity: 1 });
   }
 
   buyBond(totalValue: number) {
-    const purchasePrice = 1000; // Assume a fixed cost per bond
-    const quantity = totalValue / purchasePrice;
-    this.bonds.push({ purchasePrice, currentValue: purchasePrice, quantity });
+    this.bonds.push({ purchasePrice: totalValue, currentValue: totalValue, quantity: 1 });
   }
 
-  sellStock(amount: number, sellTimeYears: number): StockTransactionResult {
+  sellStock(sellValue: number, sellTimeYears: number): StockTransactionResult {
     const totalStockValue = this.getStockValue();
-    if (amount > totalStockValue) {
+    if (sellValue > totalStockValue) {
       return { shortTermGains: 0, longTermGains: 0, insufficientAssets: true };
     }
 
     const sellTime = this.calculateTimeInMilliseconds(sellTimeYears, 0);
-    let remainingAmount = amount;
+    let remainingAmount = sellValue;
     let shortTermGains = 0;
     let longTermGains = 0;
 
@@ -73,14 +69,14 @@ export class Account implements Portfolio {
     return { shortTermGains, longTermGains, insufficientAssets: false };
   }
 
-  sellBond(amount: number): BondTransactionResult {
+  sellBond(sellValue: number): BondTransactionResult {
     const totalBondValue = this.getBondValue();
 
-    if (amount > totalBondValue) {
+    if (sellValue > totalBondValue) {
       return { taxableAmount: 0, insufficientAssets: true };
     }
 
-    let remainingAmount = amount;
+    let remainingAmount = sellValue;
     let taxableAmount = 0;
 
     for (let i = 0; i < this.bonds.length && remainingAmount > 0; i++) {

@@ -1,7 +1,9 @@
 import type { RetirementCalculationResult } from "$lib/types/retirementCalculationResult";
-import { STATE_TAX_RATES, FEDERAL_TAX_RATES, FEDERAL_TAX_DEDUCTION } from "$lib/constants";
-import type { TaxRegion } from "$lib/types/tax/state";
+import { STATE_TAX_RATES, FEDERAL_TAX_RATES, FEDERAL_TAX_DEDUCTION, MS_PER_WEEK, MS_PER_YEAR } from "$lib/constants";
+import type { TaxRegion } from "$lib/types/tax/taxRegion";
 import { Account } from "$lib/types/portfolio/account";
+import type { BondTransactionResult } from "$lib/types/portfolio/bondTransactionResult";
+import type { StockTransactionResult } from "$lib/types/portfolio/stockTransactionResult";
 
 /**
  * Calculate retirement assets and the years they will last.
@@ -30,8 +32,6 @@ export function calculateAssets(
   const bondGrowthRate = 0.03;
   const stockProportion = stockAllocation / 100;
   const bondProportion = (100 - stockAllocation) / 100;
-  const biweeklyStockGrowthRate = stockGrowthRate / 26;
-  const biweeklyBondGrowthRate = bondGrowthRate / 26;
   let retirementAccount = new Account();
   // Deposits are assumed to be biweekly
   let biweeklyIncome = annualIncome / 26;
@@ -45,13 +45,14 @@ export function calculateAssets(
     const inflationMultiplier = i === 0 ? 1 : Math.pow(1 + annualInflation / 100, i);
     const adjustedLivingExpenses = livingExpenses * inflationMultiplier;
     const biweeklySavings = biweeklyIncome - (adjustedLivingExpenses / 26);
-    const bondBuy = bondProportion * biweeklySavings;
-    const stockBuy = stockProportion * biweeklySavings;
-    for (let j = 0; j < 26; j++) {
-      retirementAccount.applyGrowth(biweeklyStockGrowthRate, biweeklyBondGrowthRate);
-      retirementAccount.buyBond(bondBuy);
-      retirementAccount.buyStock(stockBuy, i, j * 2);
-    }
+    const annualSavings = biweeklySavings * 26;
+    const bondBuy = bondProportion * annualSavings;
+    const stockBuy = stockProportion * annualSavings;
+
+    // Apply annual growth once per year and aggregate contributions
+    retirementAccount.applyGrowth(stockGrowthRate, bondGrowthRate);
+    retirementAccount.buyBond(bondBuy);
+    retirementAccount.buyStock(stockBuy, i, 0);
   }
 
   // Withdraw from assets during retirement
@@ -158,7 +159,7 @@ export function applyTax(income: number, state: TaxRegion, stateTaxFree = false)
  * @param state The state for which to apply state taxes
  * @returns The estimated gross income required to achieve the specified net income
  */
-function findGrossIncome(
+export function findGrossIncome(
   netIncome: number,
   state: TaxRegion,
   stockProportion: number,
@@ -167,56 +168,138 @@ function findGrossIncome(
   years: number,
   taxWithdrawals: boolean
 ): Account {
+  // For untaxed withdrawals, withdraw the requested net income from stocks and bonds
+  if (!taxWithdrawals) {
+    const grossWithdrawal = netIncome;
+    const totalAccountValue = account.getAccountValue();
+    if (grossWithdrawal > totalAccountValue) {
+      return new Account();
+    }
+
+    const resultAccount = account.clone();
+    const stockTarget = Math.min(stockProportion * grossWithdrawal, resultAccount.getStockValue());
+    const bondTarget = Math.min(bondProportion * grossWithdrawal, resultAccount.getBondValue());
+
+    resultAccount.sellStock(stockTarget, years);
+    resultAccount.sellBond(bondTarget);
+
+    return resultAccount;
+  }
+
   let lowerBound = netIncome;
-  let upperBound = netIncome * 1.25;
-  let tempAccount = new Account();
-  
+  let upperBound = netIncome * 1.5;
+  let grossWithdrawalEstimate = upperBound;
+
+  // Estimate capital gains from selling stocks to reach a target withdrawal
+  const simulateStockWithdrawal = (
+    target: number,
+    sellTimeYears: number
+  ): StockTransactionResult => {
+    const totalStockValue = account.getStockValue();
+    // Cap the requested withdrawal at the total stock value to avoid overselling
+    const effectiveTarget = Math.min(target, totalStockValue);
+
+    const sellTime = sellTimeYears * MS_PER_YEAR + 0 * MS_PER_WEEK;
+    // Track how much of the target is still unsatisfied as we sell lots
+    let remainingAmount = effectiveTarget;
+    let shortTermGains = 0;
+    let longTermGains = 0;
+
+    // Iterate through stock lots in order until the target withdrawal is met
+    for (let i = 0; i < account.stocks.length && remainingAmount > 0; i++) {
+      const stock = account.stocks[i];
+      const stockValue = stock.currentValue * stock.quantity;
+      const holdingPeriod = sellTime - stock.purchaseTime;
+
+      if (stockValue <= remainingAmount) {
+        // Sell the entire lot and classify all gains as long term or short term
+        const gain = (stock.currentValue - stock.purchasePrice) * stock.quantity;
+        if (holdingPeriod > MS_PER_YEAR) {
+          longTermGains += gain;
+        } else {
+          shortTermGains += gain;
+        }
+        remainingAmount -= stockValue;
+      } else {
+        // Sell only part of the lot when a full sale would exceed the target
+        const quantityToSell = remainingAmount / stock.currentValue;
+        const gain = (stock.currentValue - stock.purchasePrice) * quantityToSell;
+        if (holdingPeriod > MS_PER_YEAR) {
+          longTermGains += gain;
+        } else {
+          shortTermGains += gain;
+        }
+        remainingAmount = 0;
+      }
+    }
+
+    return { shortTermGains, longTermGains, insufficientAssets: effectiveTarget > totalStockValue };
+  };
+
+  // Estimate taxable gains from selling bonds to reach a target withdrawal
+  const simulateBondWithdrawal = (target: number): BondTransactionResult => {
+    const totalBondValue = account.getBondValue();
+    // Cap the requested withdrawal at the total bond value to avoid overselling
+    const effectiveTarget = Math.min(target, totalBondValue);
+
+    let remainingAmount = effectiveTarget;
+    // Aggregate the gains that will be subject to income tax
+    let taxableAmount = 0;
+
+    // Iterate through bond positions until we have sold enough to meet the target
+    for (let i = 0; i < account.bonds.length && remainingAmount > 0; i++) {
+      const bond = account.bonds[i];
+      const bondValue = bond.currentValue * bond.quantity;
+
+      if (bondValue <= remainingAmount) {
+        // Sell the entire bond position and realize all associated gains
+        const gain = (bond.currentValue - bond.purchasePrice) * bond.quantity;
+        taxableAmount += gain;
+        remainingAmount -= bondValue;
+      } else {
+        // Sell only the portion of the bond position required to hit the target
+        const quantityToSell = remainingAmount / bond.currentValue;
+        const gain = (bond.currentValue - bond.purchasePrice) * quantityToSell;
+        taxableAmount += gain;
+        remainingAmount = 0;
+      }
+    }
+
+    return { taxableAmount, insufficientAssets: effectiveTarget > totalBondValue };
+  };
+
   // Binary search to calculate gross income to the nearest dollar
   while (upperBound - lowerBound > 1) {
-    tempAccount = account.clone();
     const midPoint = (lowerBound + upperBound) / 2;
+    grossWithdrawalEstimate = midPoint;
+    const totalAccountValue = account.getAccountValue();
 
-    // Attempt to withdraw from the account
-    const firstStockWithdrawalResult = tempAccount.sellStock(stockProportion * midPoint, years);
-    let bondWithdrawalResult = tempAccount.sellBond(bondProportion * midPoint);
-
-    if (firstStockWithdrawalResult.insufficientAssets && bondWithdrawalResult.insufficientAssets) {
+    if (midPoint > totalAccountValue) {
       upperBound = midPoint;
-      tempAccount = new Account();
       continue;
     }
-    // If stocks or bonds are insufficient, adjust the proportions
-    if (firstStockWithdrawalResult.insufficientAssets) {
-      const remainingStockNeeded = (stockProportion * midPoint) - (stockProportion * firstStockWithdrawalResult.shortTermGains + stockProportion * firstStockWithdrawalResult.longTermGains);
-      bondWithdrawalResult = tempAccount.sellBond(bondProportion * midPoint + remainingStockNeeded);
-    }
-    let secondStockWithdrawalResult = null;
-    if (bondWithdrawalResult.insufficientAssets) {
-      const remainingBondNeeded = (bondProportion * midPoint) - bondWithdrawalResult.taxableAmount;
-      secondStockWithdrawalResult = tempAccount.sellStock(stockProportion * midPoint + remainingBondNeeded, years);
-    }
+
+    const stockTarget = stockProportion * midPoint;
+    const bondTarget = bondProportion * midPoint;
+
+    const stockResult = simulateStockWithdrawal(stockTarget, years);
+    const bondResult = simulateBondWithdrawal(bondTarget);
+
+    const stockProceeds = Math.min(stockTarget, account.getStockValue());
+    const bondProceeds = Math.min(bondTarget, account.getBondValue());
 
     let bondTax = 0;
     let stockTax = 0;
     if (taxWithdrawals) {
-      // Calculate the taxable amounts
-      if (!secondStockWithdrawalResult) {
-        bondTax = applyTax(bondWithdrawalResult.taxableAmount, state, true) - bondWithdrawalResult.taxableAmount;
-        stockTax = applyCapitalGainsTax(
-          firstStockWithdrawalResult.shortTermGains,
-          firstStockWithdrawalResult.longTermGains
-        );
-      } else {
-        bondTax = applyTax(bondWithdrawalResult.taxableAmount, state, true) - bondWithdrawalResult.taxableAmount;
-        stockTax = applyCapitalGainsTax(
-          firstStockWithdrawalResult.shortTermGains + secondStockWithdrawalResult.shortTermGains,
-          firstStockWithdrawalResult.longTermGains + secondStockWithdrawalResult.longTermGains
-        );
-      }
+      bondTax = applyTax(bondResult.taxableAmount, state, true) - bondResult.taxableAmount;
+      stockTax = applyCapitalGainsTax(
+        stockResult.shortTermGains,
+        stockResult.longTermGains
+      );
     }
 
-    // Calculate the estimated net income
-    const estimatedNetIncome = midPoint - bondTax - stockTax;
+    // Calculate the estimated net income based on proceeds minus taxes
+    const estimatedNetIncome = stockProceeds + bondProceeds - bondTax - stockTax;
 
     // Adjust bounds based on comparison of estimated and desired
     if (estimatedNetIncome < netIncome) {
@@ -226,5 +309,19 @@ function findGrossIncome(
     }
   }
 
-  return tempAccount;
+  const grossWithdrawal = grossWithdrawalEstimate;
+  const resultAccount = account.clone();
+  const totalAccountValue = resultAccount.getAccountValue();
+
+  if (grossWithdrawal > totalAccountValue) {
+    return new Account();
+  }
+
+  const stockTarget = Math.min(stockProportion * grossWithdrawal, resultAccount.getStockValue());
+  const bondTarget = Math.min(bondProportion * grossWithdrawal, resultAccount.getBondValue());
+
+  resultAccount.sellStock(stockTarget, years);
+  resultAccount.sellBond(bondTarget);
+
+  return resultAccount;
 }

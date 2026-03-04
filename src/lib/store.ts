@@ -1,5 +1,5 @@
 import { get, writable } from 'svelte/store';
-import { TaxRegion } from './types/tax/state';
+import { TaxRegion } from './types/tax/taxRegion';
 
 export const currentAge = writable(30);
 export const retirementAge = writable(65);
